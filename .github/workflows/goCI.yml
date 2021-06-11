@@ -61,3 +61,13 @@ jobs: #Job to execute on event
       with:
         files: report.xml # make use of a file we created
         
+    - if: ${{ failure() }}
+      name: Create Issues Notifications
+      uses: nashmaniac/crate-issue-action@v1.1
+      with:
+        title: Build Failed
+        token: ${{secrets.GITHUB_TOKEN}}
+        assignees: ${{github.actor}}
+        labels: workflow-failed
+        body: Workflow failed for commit ${{github.sha}}
+        
