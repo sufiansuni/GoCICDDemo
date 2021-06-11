@@ -63,7 +63,7 @@ jobs: #Job to execute on event
         
     - if: ${{ failure() }}
       name: Create Issues Notifications
-      uses: nashmaniac/crate-issue-action@v1.1
+      uses: nashmaniac/create-issue-action@v1.1
       with:
         title: Build Failed
         token: ${{secrets.GITHUB_TOKEN}}
