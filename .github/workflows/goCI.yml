@@ -51,4 +51,6 @@ jobs: #Job to execute on event
         go get github.com/tebeka/go2xunit
         go mod init GoCICDDemo
         go mod tidy
-        go test -v      
+        go test -v # command to run go test
+        go test -v | go2xunit > report.xml # run test again and output report.xml
+        ls # verify that report is indeed created
