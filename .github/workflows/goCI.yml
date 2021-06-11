@@ -1,4 +1,4 @@
-name: Ci setup for Go #Name the workflow
+name: CI setup for Go #Name the workflow
 on: #on event keyword
   push:
     branches: [main] #identifying branch
@@ -30,3 +30,17 @@ jobs: #Job to execute on event
       run: |
         ls
         cat calc.go # Prints the content of calc.go
+        
+    - name: Checkout private repo remotely
+      uses: actions/checkout@v2
+      with:
+        repository: lowkh2/GoSchoolRemoteExample # hidden/private repo to access
+        path: virtualRepoFolder # Folder to save to, in virtual environment
+        token: ${{ secrets.GO_SECRET }} # Pass to enter remote hidden repo
+
+    - name: Show hidden files
+      run: |
+        cd virtualRepoFolder # to access folder, in virtual environment
+        ls
+        cat myText.txt # show content of file/folder
+        cd..
