@@ -10,7 +10,7 @@ jobs: #Job to execute on event
     steps:
       - name: Print a greeting
         run: |
-          ls 
+          ls
           echo Hello there! # run terminal command
 
       - name: Setup Go environment
