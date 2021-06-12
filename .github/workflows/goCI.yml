@@ -8,85 +8,98 @@ jobs: #Job to execute on event
     name: My Job
     runs-on: ubuntu-latest #specify OS in virtual machine
     steps:
-    - name: Print a greeting
-      run: |
-        ls 
-        echo Hello there! # run terminal command
-        
-    - name: Setup Go environment
-      uses: actions/setup-go@v2.1.3
-      with:
-        # The Go version to download (if necessary) and use. Supports semver spec and ranges.
-        go-version: 1.16.5 # optional
-        
-    - name: Show Go version
-      run: |
-        go version
-        
-    - name: Checkout our codes # Bring repo code to virtual environment
-      uses: actions/checkout@v2
-      
-    - name: Check file system # Check virtual environment has my files
-      run: |
-        ls
-        cat calc.go # Prints the content of calc.go
-        
-    - name: Checkout private repo remotely
-      uses: actions/checkout@v2
-      with:
-        repository: lowkh2/GoSchoolRemoteExample # hidden/private repo to access
-        path: virtualRepoFolder # Folder to save to, in virtual environment
-        token: ${{ secrets.GO_SECRET }} # Pass to enter remote hidden repo
+      - name: Print a greeting
+        run: |
+          ls 
+          echo Hello there! # run terminal command
 
-    - name: Show hidden files
-      run: |
-        cd virtualRepoFolder # to access folder, in virtual environment
-        ls
-        cat myText.txt # show content of file/folder
-        cd ..
-    
-    - name: Install dependencies for GO
-      run: |
-        go get github.com/franela/goblin
-        go get github.com/tebeka/go2xunit
-        go mod init GoCICDDemo
-        go mod tidy
-        go test -v # command to run go test
-        go test -v | go2xunit > report.xml # run test again and output report.xml
-        ls # verify that report is indeed created
-        
-    - name: Publish Unit Test Results
-      uses: EnricoMi/publish-unit-test-result-action@v1 # Checkout Unit Test Reporting action
-      if: always() # always do it
-      with:
-        files: report.xml # make use of a file we created
-        
-    - if: ${{ success() }}
-      name: Create upload directory
-      run: mkdir upload
-      
-    - name: Prepare Documents
-      run: mv report.xml ./upload
-    
-    - name: Prepare artifacts
-      uses: actions/upload-artifact@v2
-      with:
-        name: assetDocuments
-        path: upload
-    
-    - name: Download Content
-      uses: actions/download-artifact@v2
-      with:
-        name: assetDocuments
-        
-    - if: ${{ failure() }}
-      name: Create Issues Notifications
-      uses: nashmaniac/create-issue-action@v1.1
-      with:
-        title: Build Failed
-        token: ${{secrets.GITHUB_TOKEN}}
-        assignees: ${{github.actor}}
-        labels: workflow-failed
-        body: Workflow failed for commit ${{github.sha}}
-      
-    
+      - name: Setup Go environment
+        uses: actions/setup-go@v2.1.3
+        with:
+          # The Go version to download (if necessary) and use. Supports semver spec and ranges.
+          go-version: 1.16.5 # optional
+
+      - name: Show Go version
+        run: |
+          go version
+
+      - name: Checkout our codes # Bring repo code to virtual environment
+        uses: actions/checkout@v2
+
+      - name: Check file system # Check virtual environment has my files
+        run: |
+          ls
+          cat calc.go # Prints the content of calc.go
+
+      - name: Checkout private repo remotely
+        uses: actions/checkout@v2
+        with:
+          repository: lowkh2/GoSchoolRemoteExample # hidden/private repo to access
+          path: virtualRepoFolder # Folder to save to, in virtual environment
+          token: ${{ secrets.GO_SECRET }} # Pass to enter remote hidden repo
+
+      - name: Show hidden files
+        run: |
+          cd virtualRepoFolder # to access folder, in virtual environment
+          ls
+          cat myText.txt # show content of file/folder
+          cd ..
+
+      - name: Install dependencies for GO
+        run: |
+          go get github.com/franela/goblin
+          go get github.com/tebeka/go2xunit
+          go mod init GoCICDDemo
+          go mod tidy
+          go test -v # command to run go test
+          go test -v | go2xunit > report.xml # run test again and output report.xml
+          ls # verify that report is indeed created
+
+      - name: Publish Unit Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v1 # Checkout Unit Test Reporting action
+        if: always() # always do it
+        with:
+          files: report.xml # make use of a file we created
+
+      - if: ${{ success() }}
+        name: Create upload directory
+        run: mkdir upload
+
+      - name: Prepare Documents
+        run: mv report.xml ./upload
+
+      - name: Prepare artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: assetDocuments
+          path: upload
+
+      - name: Download Content
+        uses: actions/download-artifact@v2
+        with:
+          name: assetDocuments
+
+      - if: ${{ failure() }}
+        name: Create Issues Notifications
+        uses: nashmaniac/create-issue-action@v1.1
+        with:
+          title: Build Failed
+          token: ${{secrets.GITHUB_TOKEN}}
+          assignees: ${{github.actor}}
+          labels: workflow-failed
+          body: Workflow failed for commit ${{github.sha}}
+
+      - name: Check code meets quality standards
+        id: code-inspector
+        uses: codeinspectorio/github-action@master
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          code_inspector_access_key: ${{ secrets.CODE_INSPECTOR_ACCESS_KEY }}
+          code_inspector_secret_key: ${{ secrets.CODE_INSPECTOR_SECRET_KEY }}
+          min_quality_grade: 'WARNING'
+          min_quality_score: '50'
+          max_defects_rate: '0.0001'
+          max_complex_functions_rate: '0.0001'
+          max_long_functions_rate: '0.0001'
+          project_name: 'GoCICDDemo'
+          max_timeout_sec: '600'
