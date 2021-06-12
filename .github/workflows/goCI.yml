@@ -89,7 +89,7 @@ jobs: #Job to execute on event
           labels: workflow-failed
           body: Workflow failed for commit ${{github.sha}}
 
-      - name: Check code meets quality standards
+      - name: Check code meets quality standards # Code Inspector Integration
         id: code-inspector
         uses: codeinspectorio/github-action@master
         with:
